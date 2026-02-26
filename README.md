@@ -39,7 +39,7 @@ A sleek, responsive, and robust personal finance tracking dashboard built with R
 
 1. **Clone the repository**
    ```bash
-   git clone <your-repo-url>
+   git clone (https://github.com/omer-bashry/personal-finance-tracker)
    ```
 
 2. **Navigate to project directory**
