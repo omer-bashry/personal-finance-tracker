@@ -1,25 +1,34 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { X } from "lucide-react";
 import useFinance from "../../logic/hooks/useFinance";
 import { CATEGORIES } from "../../logic/utils/constants";
 
-export default function AddTransactionDialog() {
-  const { isDialogOpen, closeDialog, addTransaction } = useFinance();
+export default function EditTransactionDialog({ transaction, onClose }) {
+  const { editTransaction } = useFinance();
 
-  const [type, setType] = useState("expense");
-  const [amount, setAmount] = useState("");
-  const [category, setCategory] = useState("");
-  const [date, setDate] = useState(getTodayDate());
-  const [notes, setNotes] = useState("");
+  const [type, setType] = useState(transaction?.type || "expense");
+  const [amount, setAmount] = useState(transaction?.amount || "");
+  const [category, setCategory] = useState(transaction?.category || "");
+  const [date, setDate] = useState(transaction?.date || getTodayDate());
+  const [notes, setNotes] = useState(transaction?.notes || "");
 
-  if (!isDialogOpen) return null;
+  useEffect(() => {
+    if (transaction) {
+      setType(transaction.type);
+      setAmount(transaction.amount);
+      setCategory(transaction.category === "Income" ? "" : transaction.category);
+      setDate(transaction.date);
+      setNotes(transaction.notes || "");
+    }
+  }, [transaction]);
 
+  if (!transaction) return null;
 
   function handleSubmit(e) {
     e.preventDefault();
 
-    const transaction = {
-      id: Date.now(),
+    const updatedTransaction = {
+      ...transaction,
       type,
       amount: parseFloat(amount),
       category: type === "income" ? "Income" : category,
@@ -27,22 +36,12 @@ export default function AddTransactionDialog() {
       notes,
     };
 
-    addTransaction(transaction);
-
-    resetForm();
-  }
-
-  function resetForm() {
-    setType("expense");
-    setAmount("");
-    setCategory("");
-    setDate(getTodayDate());
-    setNotes("");
+    editTransaction(transaction.id, updatedTransaction);
+    onClose();
   }
 
   function handleCancel() {
-    closeDialog();
-    resetForm();
+    onClose();
   }
 
   return (
@@ -53,8 +52,8 @@ export default function AddTransactionDialog() {
       >
         <div className="flex justify-between items-center mb-6">
           <div>
-            <h2 className="text-xl font-bold text-gray-800 dark:text-gray-100">Add Transaction</h2>
-            <p className="text-xs text-gray-400 dark:text-gray-500 mt-1 uppercase tracking-widest font-bold">New Entry</p>
+            <h2 className="text-xl font-bold text-gray-800 dark:text-gray-100">Edit Transaction</h2>
+            <p className="text-xs text-gray-400 dark:text-gray-500 mt-1 uppercase tracking-widest font-bold">Update Entry</p>
           </div>
           <button onClick={handleCancel} className="p-2 bg-gray-50 dark:bg-gray-700/50 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-full transition cursor-pointer">
             <X size={20} />
@@ -173,7 +172,7 @@ export default function AddTransactionDialog() {
                   : "bg-blue-600 shadow-blue-100 hover:bg-blue-700"
               }`}
             >
-              {type === "income" ? "Save Income" : "Save Expense"}
+              Save Changes
             </button>
           </div>
         </form>
